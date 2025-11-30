@@ -5,6 +5,7 @@ node_modules/
 /src/gen
 .cpcache/
 /build
+resources
 
 pom.xml
 pom.xml.asc
