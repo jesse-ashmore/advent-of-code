@@ -2,41 +2,52 @@
   (:require
    [clojure.string :as string]))
 
-(def real (slurp "./resources/real"))
-
-(def example "R5, L5, R5, R3")
+(def real (slurp "./resources/1/real"))
+(def example (slurp "./resources/1/example"))
 
 (defn parse-input [str]
-  (map #(vector (first %) (Integer/parseInt (clojure.string/join (rest %)) 10)) (clojure.string/split str #", ")))
+  (->> (clojure.string/split-lines str)
+       (map #(case (first %)
+               \L (* -1 (Integer/parseInt (subs % 1)))
+               \R (Integer/parseInt (subs % 1)))              ; Remove first character
+            )))
 
 (parse-input example)
 
-(defn turn [heading next]
-  (mod (case next
-         \L (dec heading)
-         \R (inc heading)) 4))
-
-(defn take-step [heading step]
-  (case heading
-    0 [0 (* -1 step)]
-    1 [step 0]
-    2 [0 step]
-    3 [(* -1 step)]))
-
-(defn get-steps [instructions]
-  (loop [[next & remaining] instructions
-         heading 0
-         steps []]
+(defn part-one [inst]
+  (loop [[next & remaining] inst
+         dial 50
+         clicks 0]
     (if (nil? next)
-      steps
-      (recur remaining
-             (turn heading (first next))
-             (conj steps (take-step (turn heading (first next)) 10))))))
+      clicks
+      (let [new_dial (mod (+ next dial) 100)
+            new_clicks (+ clicks (if (zero? new_dial) 1 0))]
+        (recur remaining new_dial new_clicks)))))
 
-(get-steps (parse-input example))
+(defn is-partial-rot [dial rot]
+  (let [applied (+ dial rot)]
+    (if (zero? dial)
+      false
+      (if (< rot 0)
+        (< applied 0)
+        (> applied 100)))))
 
-(defn part1 [input]
-  (reduce + (map abs (reduce #(apply vector (map + %1 %2))
-                             (get-steps (parse-input input))))))
+;; (is-partial-rot 1 -5)
+;; (rem -120 100)
 
-(part1 example)
+(defn part-two [inst]
+  (loop [[next & remaining] inst
+         dial 50
+         clicks 0]
+    (if (nil? next)
+      clicks
+      (let [new_dial (mod (+ next dial) 100)
+            new_clicks (+ clicks
+                          (int (/ (abs next) 100))
+                          (if (and (not (zero? new_dial)) (is-partial-rot dial (rem next 100))) 1 0)
+                          (if (zero? new_dial) 1 0))]
+        ;; (println (str new_dial " " new_clicks))
+        (recur remaining new_dial new_clicks)))))
+
+(part-one (parse-input real))
+(part-two (parse-input real))
