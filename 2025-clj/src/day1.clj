@@ -9,8 +9,7 @@
   (->> (clojure.string/split-lines str)
        (map #(case (first %)
                \L (* -1 (Integer/parseInt (subs % 1)))
-               \R (Integer/parseInt (subs % 1)))              ; Remove first character
-            )))
+               \R (Integer/parseInt (subs % 1))))))
 
 (parse-input example)
 
@@ -24,8 +23,8 @@
             new_clicks (+ clicks (if (zero? new_dial) 1 0))]
         (recur remaining new_dial new_clicks)))))
 
-(defn is-partial-rot [dial rot]
-  (let [applied (+ dial rot)]
+(defn includes-extra-click [dial rot]
+  (let [applied (+ dial (rem rot 100))]
     (if (zero? dial)
       false
       (if (< rot 0)
@@ -43,8 +42,11 @@
       clicks
       (let [new_dial (mod (+ next dial) 100)
             new_clicks (+ clicks
+                          ; Clicks from full rotations
                           (int (/ (abs next) 100))
-                          (if (and (not (zero? new_dial)) (is-partial-rot dial (rem next 100))) 1 0)
+                          ; Clicks from remaining partial rotations
+                          (if (and (not (zero? new_dial)) (includes-extra-click dial next)) 1 0)
+                          ; If we land on 0, that's an extra click
                           (if (zero? new_dial) 1 0))]
         ;; (println (str new_dial " " new_clicks))
         (recur remaining new_dial new_clicks)))))
