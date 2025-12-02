@@ -9,8 +9,8 @@ pub fn solve(input: &str) -> (Option<u64>, Option<u64>) {
         .split(',')
         .filter_map(|line| {
             let mut parts = line.split('-');
-            let start = parts.next().unwrap(); //?.parse::<u64>().ok()?;
-            let end = parts.next().unwrap(); //?.parse::<u64>().ok()?;
+            let start = parts.next().unwrap();
+            let end = parts.next().unwrap();
             Some((start, end))
         })
         .collect();
@@ -27,7 +27,7 @@ pub fn solve(input: &str) -> (Option<u64>, Option<u64>) {
     let mut invalid_2 = HashSet::new();
     for range in ranges {
         let results = find_invalid_any(&range);
-        println!("{:?} {:?}", range, results);
+        // println!("{:?} {:?}", range, results);
         results.iter().for_each(|id| {
             invalid_2.insert(id.clone());
         });
@@ -45,65 +45,41 @@ fn find_invalid_any(range: &(&str, &str)) -> HashSet<u64> {
     let min = range.0.parse::<u64>().unwrap();
     let max = range.1.parse::<u64>().unwrap();
 
+    // Start with block size 1
+    // Increment digits in each block and duplicate across range
     // Start with first digit in block, if under, increment
     // If over, move onto next block size
     // otherwise increment and check
     // If block size over length/2.ceil(), quit
-    // Start with block size 1
-    for block_size in 1..=(range.0.len() / 2) {
-        // println!("{}", block_size);
-        let max_for_block = max.min(
-            (0..block_size)
-                .into_iter()
-                .map(|_| "9")
-                .join("")
-                .parse()
-                .unwrap(),
-        );
-        let mut block_string = range.0.chars().take(1).join("");
+    for block_size in 1..=(range.0.len() / 2) + 1 {
+        let max_for_block = max.min((0..block_size).map(|idx| 9 * 10u64.pow(idx as u32)).sum());
+        let mut block = 1;
 
         if block_size > 1 {
-            block_string += &(1..block_size)
-                .into_iter()
-                .map(|_| "0")
-                .join("")
-                .to_string();
+            block *= 10u64.pow((block_size - 1) as u32);
         }
-        let mut block = block_string.parse::<u64>().unwrap();
+
         // println!("BLOCK START {}", block);
         // println!("BLOCK SIZE {}", block_size);
 
-        // Increment digits in each block and duplicate across range
-
         while block <= max_for_block {
-            let test: u64 = (0..(range.1.len() / block_size))
-                .map(|_| block)
-                .join("")
-                .parse()
-                .unwrap();
+            for repeats in (range.0.len() / block_size).max(2)..(range.1.len() / block_size) + 1 {
+                let test: u64 = (0..repeats)
+                    .map(|idx| block as u64 * 10u64.pow(block_size as u32 * idx as u32))
+                    .sum();
 
-            // println!("TEST {}", test)
-            if test > max {
-                break 
-            }
-            if test >= min {
-                if test <= max {
-                    invalid.insert(test);
+                if test > max {
+                    break;
+                }
+                // println!("TEST {}", test);
+                if test >= min {
+                    if test <= max {
+                        invalid.insert(test);
+                    }
                 }
             }
-
             block += 1
         }
-        // loop {
-        //     if min <= test {
-        //         if test <= max_for_block {
-        //             invalid.insert(test);
-        //         } else {
-        //             break;
-        //         }
-        //     }
-        //     block += 1;
-        // }
     }
 
     invalid
@@ -114,16 +90,9 @@ fn find_invalid(range: &(&str, &str)) -> HashSet<u64> {
     let min = range.0.parse::<u64>().unwrap();
     let max = range.1.parse::<u64>().unwrap();
 
-    // Start with block size 1
-    // Increment digits in each block and duplicate across range
-    // Start with first digit in block, if under, increment
-    // If over, move onto next block size
-    // otherwise increment and check
-    // If block size over length/2.ceil(), quit
-
     let even = range.0.len().rem_euclid(2) == 0;
-    let mut block_size = if even {
-        (range.0.len() / 2)
+    let block_size = if even {
+        range.0.len() / 2
     } else {
         (range.0.len() / 2) + 1
     };
@@ -137,9 +106,7 @@ fn find_invalid(range: &(&str, &str)) -> HashSet<u64> {
             .parse::<u64>()
             .unwrap()
     } else {
-        ("1".to_owned() + &(1..block_size).into_iter().map(|_| "0").join(""))
-            .parse::<u64>()
-            .unwrap()
+        1 * 10u64.pow((block_size - 1) as u32)
     };
     // let mut test = ;
     loop {
