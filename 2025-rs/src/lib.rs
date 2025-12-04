@@ -24,6 +24,12 @@ where
 
 /// A trait to simplify printing and indexing of 2D data structures.
 pub trait Grid<T> {
+    fn neighbours_around<'a>(
+        &'a self,
+        from: (usize, usize),
+    ) -> impl Iterator<Item = ((usize, usize), &'a T)>
+    where
+        T: 'a;
     fn find_item(&self, item: T) -> Option<(usize, usize)>
     where
         T: PartialEq;
@@ -206,6 +212,18 @@ impl<T: Copy> Grid<T> for Vec<Vec<T>> {
             .filter_map(|pos| self.getxy_pos(pos).map(|v| (pos, v)))
     }
 
+    fn neighbours_around<'a>(
+        &'a self,
+        from: (usize, usize),
+    ) -> impl Iterator<Item = ((usize, usize), &'a T)>
+    where
+        T: 'a,
+    {
+        DirectionAll::iterator()
+            .map(move |d| d.step_usize(from))
+            .filter_map(|pos| self.getxy_pos(pos).map(|v| (pos, v)))
+    }
+
     fn find_item(&self, item: T) -> Option<(usize, usize)>
     where
         T: PartialEq,
@@ -260,6 +278,18 @@ impl<T: Copy, const W: usize, const H: usize> Grid<T> for [[T; W]; H] {
         T: 'a,
     {
         DirectionAxes::iterator()
+            .map(move |d| d.step_usize(from))
+            .filter_map(|pos| self.getxy_pos(pos).map(|v| (pos, v)))
+    }
+
+    fn neighbours_around<'a>(
+        &'a self,
+        from: (usize, usize),
+    ) -> impl Iterator<Item = ((usize, usize), &'a T)>
+    where
+        T: 'a,
+    {
+        DirectionAll::iterator()
             .map(move |d| d.step_usize(from))
             .filter_map(|pos| self.getxy_pos(pos).map(|v| (pos, v)))
     }
