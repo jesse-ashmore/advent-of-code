@@ -27,6 +27,14 @@ fn parse_ingredient(line: &str) -> RangeInclusive<usize> {
     a.parse().unwrap()..=b.parse().unwrap()
 }
 
+fn merge_intervals(intervals: &[RangeInclusive<usize>]) -> Vec<RangeInclusive<usize>> {
+    let merged = Vec::new();
+
+    let sorted = intervals.iter().sorted_by_key(|r| r.start()).collect_vec();
+
+    merged
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
