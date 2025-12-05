@@ -1,4 +1,4 @@
-use std::{collections::HashSet, hash::Hash};
+use std::collections::HashSet;
 
 use itertools::Itertools;
 
@@ -7,20 +7,20 @@ advent_of_code::solution!(2);
 pub fn solve(input: &str) -> (Option<u64>, Option<u64>) {
     let ranges: Vec<(&str, &str)> = input
         .split(',')
-        .filter_map(|line| {
+        .map(|line| {
             let mut parts = line.split('-');
             let start = parts.next().unwrap();
             let end = parts.next().unwrap();
-            Some((start, end))
+            (start, end)
         })
         .collect();
 
     let mut invalid = HashSet::new();
     for range in &ranges {
-        let results = find_invalid(&range);
+        let results = find_invalid(range);
         // println!("{:?} {:?}", range, results);
         results.iter().for_each(|id| {
-            invalid.insert(id.clone());
+            invalid.insert(*id);
         });
     }
 
@@ -29,7 +29,7 @@ pub fn solve(input: &str) -> (Option<u64>, Option<u64>) {
         let results = find_invalid_any(&range);
         // println!("{:?} {:?}", range, results);
         results.iter().for_each(|id| {
-            invalid_2.insert(id.clone());
+            invalid_2.insert(*id);
         });
     }
 
@@ -65,18 +65,17 @@ fn find_invalid_any(range: &(&str, &str)) -> HashSet<u64> {
         while block <= max_for_block {
             for repeats in (range.0.len() / block_size).max(2)..(range.1.len() / block_size) + 1 {
                 let test: u64 = (0..repeats)
-                    .map(|idx| block as u64 * 10u64.pow(block_size as u32 * idx as u32))
+                    .map(|idx| block * 10u64.pow(block_size as u32 * idx as u32))
                     .sum();
 
                 if test > max {
                     break;
                 }
                 // println!("TEST {}", test);
-                if test >= min {
-                    if test <= max {
+                if test >= min
+                    && test <= max {
                         invalid.insert(test);
                     }
-                }
             }
             block += 1
         }
@@ -106,11 +105,11 @@ fn find_invalid(range: &(&str, &str)) -> HashSet<u64> {
             .parse::<u64>()
             .unwrap()
     } else {
-        1 * 10u64.pow((block_size - 1) as u32)
+        10u64.pow((block_size - 1) as u32)
     };
     // let mut test = ;
     loop {
-        let test = (format!("{}{}", block, block).parse::<u64>().unwrap());
+        let test = format!("{}{}", block, block).parse::<u64>().unwrap();
         if min <= test {
             if test <= max {
                 invalid.insert(test);

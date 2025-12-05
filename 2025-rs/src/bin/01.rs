@@ -37,7 +37,7 @@ impl Inst {
     }
 }
 
-pub fn solve(input: &String) -> (Option<u64>, Option<u64>) {
+pub fn solve(input: &str) -> (Option<u64>, Option<u64>) {
     let instructions = input.lines().map(Inst::from_line).collect_vec();
 
     (Some(part_one(&instructions)), Some(part_two(&instructions)))
@@ -71,7 +71,7 @@ fn part_two(instructions: &[Inst]) -> u64 {
         if dial == 0 {
             clicks += 1;
         }
-        clicks += (inst.1 / 100).abs() as u64;
+        clicks += (inst.1 / 100).unsigned_abs() as u64;
     }
 
     clicks

@@ -37,7 +37,7 @@ pub fn solve(input: &str) -> (Option<u64>, Option<u64>) {
                 .for_each(|(x, y)| {
                     if let Some(to_decr) = map_sweeper.getxy_pos_mut((x as usize, y as usize)) {
                         if *to_decr > 0 {
-                            *to_decr = *to_decr - 1;
+                            *to_decr -= 1;
                         }
                     }
                 });
@@ -57,7 +57,7 @@ fn remove_paper(
         .map(|(pos, _)| pos)
         .collect_vec();
 
-    if to_remove.len() == 0 {
+    if to_remove.is_empty() {
         None
     } else {
         Some(to_remove)
