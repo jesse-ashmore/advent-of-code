@@ -1,8 +1,5 @@
-use std::str::Chars;
 
-use advent_of_code::Grid;
 use itertools::Itertools;
-use regex::Regex;
 
 advent_of_code::solution!(6);
 
@@ -125,7 +122,7 @@ fn parse_equations(input: &str) -> Vec<Equation> {
 
     parsed
         .iter()
-        .map(|row| Equation::from_row(row))
+        .map(Equation::from_row)
         .collect_vec()
 }
 

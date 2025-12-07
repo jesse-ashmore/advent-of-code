@@ -8,10 +8,10 @@ pub fn solve(input: &str) -> (Option<u64>, Option<u64>) {
     let (p1, p2) = input.split_once("\n\n").unwrap();
 
     let fresh: Vec<RangeInclusive<usize>> = p1.lines().map(parse_ingredient).collect_vec();
-    let available = dbg!(p2
+    let available = p2
         .lines()
         .map(|l| l.parse::<usize>().unwrap())
-        .collect_vec());
+        .collect_vec();
 
     let part_1 = available
         .iter()
