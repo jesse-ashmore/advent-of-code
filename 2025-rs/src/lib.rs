@@ -430,21 +430,17 @@ where
 }
 
 pub trait Pairs<T> {
-    fn pairs<'a>(&self) -> impl Iterator<Item = (T, T)>
+    fn pairs<'a>(&'a self) -> impl Iterator<Item = (&'a T, &'a T)>
     where
-        T: 'a,
-        T: Copy;
+        T: 'a;
 }
 
 impl<T> Pairs<T> for Vec<T> {
-    fn pairs<'a>(&self) -> impl Iterator<Item = (T, T)>
+    fn pairs<'a>(&'a self) -> impl Iterator<Item = (&'a T, &'a T)>
     where
         T: 'a,
-        T: Copy,
     {
-        self.iter()
-            .enumerate()
-            .flat_map(|(i, a)| self[i + 1..].iter().map(|b| (*a, *b)))
+        (0..self.len()).flat_map(move |i| (i + 1..self.len()).map(move |j| (&self[i], &self[j])))
     }
 }
 
