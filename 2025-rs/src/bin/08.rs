@@ -38,8 +38,8 @@ fn parse_junctions(input: &str) -> Vec<Junction> {
 
 fn build_circuits_by_closest<'a>(boxes: &'a Vec<Junction>) -> HashMap<u16, usize> {
     let mut circuit_assignment = [0u16; 1000];
-    let mut circuit_index = 1;
     let boxes_with_index = boxes.iter().enumerate().collect_vec();
+    (0..boxes.len()).for_each(|i| circuit_assignment[i] = (i + 1) as u16);
 
     for ((pos_a, a), (pos_b, b)) in boxes_with_index
         .pairs()
@@ -48,18 +48,7 @@ fn build_circuits_by_closest<'a>(boxes: &'a Vec<Junction>) -> HashMap<u16, usize
         // dbg!((a, b));
         let a_circuit = circuit_assignment[*pos_a];
         let b_circuit = circuit_assignment[*pos_b];
-        if a_circuit == 0 && b_circuit == 0 {
-            // Add them to the same circuit
-            circuit_assignment[*pos_a] = circuit_index;
-            circuit_assignment[*pos_b] = circuit_index;
-            circuit_index += 1;
-        } else if a_circuit == 0 && b_circuit != 0 {
-            // Connect a to b
-            circuit_assignment[*pos_a] = b_circuit
-        } else if a_circuit != 0 && b_circuit == 0 {
-            // Connect b to a
-            circuit_assignment[*pos_b] = a_circuit
-        } else if a_circuit != b_circuit {
+        if a_circuit != b_circuit {
             // Combine two circuits (B -> A)
             circuit_assignment
                 .iter_mut()
