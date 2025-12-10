@@ -6,24 +6,30 @@ advent_of_code::solution!(10);
 
 #[derive(Debug)]
 struct Machine {
-    start_pattern: Vec<bool>,
-    indicators: usize,
-    buttons: Vec<Vec<usize>>,
+    start_pattern: u16,
+    buttons: Vec<u16>,
     requirements: Vec<usize>,
 }
 
 impl Machine {
     fn from_line(line: &str) -> Self {
         let parts = line.split(" ").collect_vec();
-        let indicator_part = &parts[0][1..parts[0].len()];
-        let start_pattern = indicator_part.chars().map(|c| c == '#').collect_vec();
+        let indicator_part = &parts[0][1..parts[0].len() - 1];
+        let indicator_size = indicator_part.len();
+        let start_pattern = indicator_part
+            .chars()
+            .rev()
+            .map(|c| if c == '#' { 1u16 } else { 0u16 })
+            .enumerate()
+            .map(|(shift, v)| v << shift)
+            .sum();
         let buttons = parts[1..parts.len() - 1]
             .iter()
             .map(|block| {
                 block[1..block.len() - 1]
                     .split(",")
-                    .map(|t| t.parse().unwrap())
-                    .collect_vec()
+                    .map(|t| 1 << ((indicator_size as u16 - t.parse::<u16>().unwrap()) - 1))
+                    .sum()
             })
             .collect_vec();
         let requirements = parts[parts.len() - 1][1..parts[parts.len() - 1].len() - 1]
@@ -32,8 +38,7 @@ impl Machine {
             .collect_vec();
 
         Machine {
-            start_pattern: start_pattern.clone(),
-            indicators: start_pattern.len(),
+            start_pattern,
             buttons,
             requirements,
         }
@@ -44,25 +49,25 @@ pub fn solve(input: &str) -> (Option<usize>, Option<usize>) {
     let machines = input.lines().map(Machine::from_line).collect_vec();
     let part_1 = machines
         .iter()
-        .map(|m| get_min_presses(&m.start_pattern, &m.buttons))
+        .map(|m| get_min_presses(m.start_pattern, &m.buttons))
         .sum();
 
     (part_1, None)
 }
 
 struct State {
-    indicators: Vec<bool>,
+    indicators: u16,
     presses: usize,
     last_button: usize,
 }
 
-fn get_min_presses(end: &[bool], buttons: &[Vec<usize>]) -> Option<usize> {
+fn get_min_presses(end: u16, buttons: &[u16]) -> Option<usize> {
     let mut min_presses: Option<usize> = None;
-    let start = end.iter().map(|_| false).collect_vec();
+    let start = 0;
     let mut queue: VecDeque<State> = VecDeque::new();
     for (idx, button) in buttons.iter().enumerate() {
         queue.push_front(State {
-            indicators: press(start.clone(), &button),
+            indicators: press(start, *button),
             presses: 1,
             last_button: idx,
         });
@@ -80,7 +85,7 @@ fn get_min_presses(end: &[bool], buttons: &[Vec<usize>]) -> Option<usize> {
                 continue;
             }
             queue.push_back(State {
-                indicators: press(state.indicators.clone(), &button),
+                indicators: press(state.indicators, *button),
                 presses: state.presses + 1,
                 last_button: idx,
             });
@@ -89,12 +94,8 @@ fn get_min_presses(end: &[bool], buttons: &[Vec<usize>]) -> Option<usize> {
     min_presses
 }
 
-fn press(input: Vec<bool>, button: &[usize]) -> Vec<bool> {
-    let mut new_state = input.clone();
-    for change in button {
-        new_state[*change] = !new_state[*change];
-    }
-    new_state.to_vec()
+fn press(input: u16, button: u16) -> u16 {
+    input ^ button
 }
 
 #[cfg(test)]
@@ -105,5 +106,12 @@ mod tests {
     fn test_solve() {
         let result = solve(&advent_of_code::template::read_file("examples", DAY));
         assert_eq!(result, (Some(7), None));
+    }
+
+    #[test]
+    fn test_press() {
+        assert_eq!(0b0110, press(0, 0b0110));
+        assert_eq!(0, press(0b0110, 0b0110));
+        assert_eq!(0b0100, press(0b010, 0b0110));
     }
 }
