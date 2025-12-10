@@ -59,7 +59,7 @@ pub fn solve(input: &str) -> (Option<u64>, Option<u64>) {
     for (i, (x, vertical)) in verticals.iter().enumerate() {
         let crossed = verticals[i + 1..]
             .iter()
-            .filter(|(other_x, other_vertical)| {
+            .filter(|(_, other_vertical)| {
                 let mid = (vertical.start + vertical.end) / 2;
                 if other_vertical.start <= mid && mid <= other_vertical.end {
                     return true;
@@ -67,8 +67,12 @@ pub fn solve(input: &str) -> (Option<u64>, Option<u64>) {
                 false
             })
             .count();
-        let offset_x = if crossed.rem_euclid(2) == 0 { 1 } else { -1 };
-        outside_vert.push((x + offset_x, (vertical.start - 1..vertical.end + 1)));
+        let offset_x: u64 = if crossed.rem_euclid(2) == 0 {
+            x + 1
+        } else {
+            x - 1
+        };
+        outside_vert.push((offset_x, (vertical.start + 1..vertical.end - 1)));
     }
 
     // let largest_inner_rect = square_like_ordered
