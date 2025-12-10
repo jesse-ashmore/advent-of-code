@@ -52,50 +52,34 @@ pub fn solve(input: &str) -> (Option<usize>, Option<usize>) {
         .map(|m| get_min_presses(m.start_pattern, &m.buttons))
         .sum();
 
-    (part_1, None)
+    // https://docs.rs/good_lp/latest/good_lp/ ?
+    // https://docs.rs/highs/latest/highs/
+    // Using micro-lp: https://github.com/timvisee/advent-of-code-2025/blob/master/day10b/src/main.rs
+    // Using good_lp: https://github.com/wilkotom/AdventOfCode/blob/main/rust/2025/day10/src/main.rs
+
+    (Some(part_1), None)
 }
 
 struct State {
     indicators: u16,
     presses: usize,
-    last_button: usize,
 }
 
-fn get_min_presses(end: u16, buttons: &[u16]) -> Option<usize> {
-    let mut min_presses: Option<usize> = None;
-    let start = 0;
-    let mut queue: VecDeque<State> = VecDeque::new();
-    for (idx, button) in buttons.iter().enumerate() {
-        queue.push_front(State {
-            indicators: press(start, *button),
-            presses: 1,
-            last_button: idx,
-        });
+fn get_min_presses(end: u16, buttons: &[u16]) -> usize {
+    let mut queue = VecDeque::new();
+    for (_, button) in buttons.iter().enumerate() {
+        queue.push_front((*button, 1usize));
     }
 
     while let Some(state) = queue.pop_front() {
-        if min_presses.is_some() && min_presses.unwrap() <= state.presses {
-            continue;
+        if state.0 == end {
+            return state.1;
         }
-        if state.indicators == end {
-            min_presses = Some(state.presses);
-        }
-        for (idx, button) in buttons.iter().enumerate() {
-            if state.last_button == idx {
-                continue;
-            }
-            queue.push_back(State {
-                indicators: press(state.indicators, *button),
-                presses: state.presses + 1,
-                last_button: idx,
-            });
+        for (_, button) in buttons.iter().enumerate() {
+            queue.push_back((state.0 ^ *button, state.1 + 1));
         }
     }
-    min_presses
-}
-
-fn press(input: u16, button: u16) -> u16 {
-    input ^ button
+    unreachable!()
 }
 
 #[cfg(test)]
