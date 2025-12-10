@@ -44,7 +44,7 @@ pub fn solve(input: &str) -> (Option<usize>, Option<usize>) {
     let machines = input.lines().map(Machine::from_line).collect_vec();
     let part_1 = machines
         .iter()
-        .map(|m| dbg!(get_min_presses(&m.start_pattern, &m.buttons)))
+        .map(|m| get_min_presses(&m.start_pattern, &m.buttons))
         .sum();
 
     (part_1, None)
@@ -68,7 +68,7 @@ fn get_min_presses(end: &[bool], buttons: &[Vec<usize>]) -> Option<usize> {
         });
     }
 
-    while let Some(state) = queue.pop_back() {
+    while let Some(state) = queue.pop_front() {
         if min_presses.is_some() && min_presses.unwrap() <= state.presses {
             continue;
         }
