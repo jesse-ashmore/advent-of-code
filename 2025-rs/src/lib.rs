@@ -334,6 +334,7 @@ pub trait Direction {
         Self: Sized;
     fn step(&self) -> (i32, i32);
     fn step_usize(&self, pos: (usize, usize)) -> (usize, usize);
+    fn turn(&self, clockwise: bool) -> Self;
 }
 
 impl Direction for DirectionAxes {
@@ -362,6 +363,23 @@ impl Direction for DirectionAxes {
             (pos.0 as i32 + step.0) as usize,
             (pos.1 as i32 + step.1) as usize,
         )
+    }
+
+    fn turn(&self, clockwise: bool) -> Self {
+        if clockwise {
+            return match self {
+                DirectionAxes::Up => DirectionAxes::Right,
+                DirectionAxes::Down => DirectionAxes::Left,
+                DirectionAxes::Left => DirectionAxes::Up,
+                DirectionAxes::Right => DirectionAxes::Down,
+            };
+        }
+        match self {
+            DirectionAxes::Up => DirectionAxes::Left,
+            DirectionAxes::Down => DirectionAxes::Right,
+            DirectionAxes::Left => DirectionAxes::Down,
+            DirectionAxes::Right => DirectionAxes::Up,
+        }
     }
 }
 
@@ -399,6 +417,10 @@ impl Direction for DirectionAll {
             (pos.0 as i32 + step.0) as usize,
             (pos.1 as i32 + step.1) as usize,
         )
+    }
+
+    fn turn(&self, clockwise: bool) -> Self {
+        unimplemented!()
     }
 }
 
