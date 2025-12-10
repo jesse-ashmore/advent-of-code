@@ -29,115 +29,73 @@ pub fn solve(input: &str) -> (Option<u64>, Option<u64>) {
         .first()
         .map(|pair| area_manhattan(*pair));
 
-    let mut perimeter = HashSet::new();
-    let clockwise = match get_heading(red_tiles[0], red_tiles[1]) {
-        DirectionAxes::Right => true,
-        DirectionAxes::Down => false,
-        _ => panic!("Top-most, left-most point should head right or down"),
-    };
+    let height = red_tiles.iter().map(|(_, y)| y).max().unwrap();
+    let width = red_tiles.iter().map(|(x, _)| x).max().unwrap();
 
+    let mut verticals = Vec::new();
+    let mut horizontals = Vec::new();
+    let mut outside_vert = Vec::new();
+    // let mut outside_horiz = Vec::new();
+
+    // build vectors
     for (a, b) in red_tiles
         .iter()
         .chain([*red_tiles.first().unwrap()].iter())
         .tuple_windows()
     {
         match get_heading(*a, *b) {
-            DirectionAxes::Up => {
-                // Clockwise outside => L else R
-                let outside_x = if clockwise { a.0 - 1 } else { a.0 + 1 };
-                (b.1.min(a.1)-1..=b.1.max(a.1)).for_each(|y| {
-                    perimeter.insert((outside_x, y));
-                });
+            DirectionAxes::Up | DirectionAxes::Down => {
+                verticals.push((a.0, b.1.min(a.1)..b.1.max(a.1)));
             }
-            DirectionAxes::Down => {
-                // Clockwise outside => R else L
-                let outside_x = if clockwise { a.0 + 1 } else { a.0 - 1 };
-                (a.1..=b.1 + 1).for_each(|y| {
-                    perimeter.insert((outside_x, y));
-                });
-            }
-            DirectionAxes::Left => {
-                // Clockwise outside => B else T
-                let outside_y = if clockwise { a.1 + 1 } else { a.1 - 1 };
-                (b.0 - 1..=a.0).for_each(|x| {
-                    perimeter.insert((x, outside_y));
-                });
-            }
-            DirectionAxes::Right => {
-                // Clockwise outside => T else B
-                let outside_y = if clockwise { a.1 - 1 } else { a.1 + 1 };
-                (a.0..=b.0).for_each(|x| {
-                    perimeter.insert((x, outside_y));
-                });
-            }
-        }
-        for y in 0..14 {
-            for x in 0..14 {
-                let x = if perimeter.contains(&(x, y)) {
-                    "X"
-                } else {
-                    "."
-                };
-                print!("{}", x);
-            }
-            println!();
-        }
-    }
 
-    // Patch over any accidentally permiterized red/green tiles (about half need to be reinstated)
-    for (a, b) in red_tiles
-        .iter()
-        .chain([*red_tiles.last().unwrap()].iter())
-        .tuple_windows()
-    {
-        if a.0 == b.0 {
-            for y in a.1.min(b.1)..=a.1.max(b.1) {
-                perimeter.remove(&(a.0, y));
-            }
-        } else {
-            for x in a.0.min(b.0)..=a.0.max(b.0) {
-                perimeter.remove(&(x, a.1));
+            DirectionAxes::Left | DirectionAxes::Right => {
+                horizontals.push((a.1, b.0.min(a.0)..b.0.max(a.0)));
             }
         }
     }
+    verticals.sort_by_key(|(x, _)| *x);
+    horizontals.sort_by_key(|(y, _)| *y);
 
-    for y in 0..14 {
-        for x in 0..14 {
-            let x = if perimeter.contains(&(x, y)) {
-                "X"
-            } else {
-                "."
-            };
-            print!("{}", x);
-        }
-        println!();
+    for (i, (x, vertical)) in verticals.iter().enumerate() {
+        let crossed = verticals[i + 1..]
+            .iter()
+            .filter(|(other_x, other_vertical)| {
+                let mid = (vertical.start + vertical.end) / 2;
+                if other_vertical.start <= mid && mid <= other_vertical.end {
+                    return true;
+                }
+                false
+            })
+            .count();
+        let offset_x = if crossed.rem_euclid(2) == 0 { 1 } else { -1 };
+        outside_vert.push((x + offset_x, (vertical.start - 1..vertical.end + 1)));
     }
-    panic!();
-    let largest_inner_rect = square_like_ordered
-        .iter()
-        .filter(|(a, b)| {
-            let top = a.1.min(b.1);
-            let right = a.0.max(b.1);
-            let bottom = a.1.max(b.1);
-            let left = a.0.min(b.0);
 
-            for x in left..=right {
-                if perimeter.contains(&(x, top)) || perimeter.contains(&(x, bottom)) {
-                    return false;
-                };
-            }
-            for y in top..=bottom {
-                if perimeter.contains(&(left, y)) || perimeter.contains(&(right, y)) {
-                    return false;
-                };
-            }
+    // let largest_inner_rect = square_like_ordered
+    //     .iter()
+    //     .filter(|(a, b)| {
+    //         let top = a.1.min(b.1);
+    //         let right = a.0.max(b.1);
+    //         let bottom = a.1.max(b.1);
+    //         let left = a.0.min(b.0);
 
-            true
-        })
-        .next()
-        .map(|pair| area_manhattan(*pair));
+    //         for x in left..=right {
+    //             if perimeter.contains(&(x, top)) || perimeter.contains(&(x, bottom)) {
+    //                 return false;
+    //             };
+    //         }
+    //         for y in top..=bottom {
+    //             if perimeter.contains(&(left, y)) || perimeter.contains(&(right, y)) {
+    //                 return false;
+    //             };
+    //         }
 
-    (part_1, largest_inner_rect)
+    //         true
+    //     })
+    //     .next()
+    //     .map(|pair| area_manhattan(*pair));
+
+    (part_1, None)
 }
 
 fn get_heading(from: (u64, u64), to: (u64, u64)) -> DirectionAxes {
