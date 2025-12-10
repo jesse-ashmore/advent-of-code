@@ -17,6 +17,8 @@ pub fn solve(input: &str) -> (Option<u64>, Option<u64>) {
         .first()
         .map(|pair| area_manhattan(*pair));
 
+    // Had the right idea originally but adapted implementation from
+    // https://www.reddit.com/r/adventofcode/comments/1phywvn/comment/nt85x48/
     let mut verticals = Vec::new();
     let mut horizontals = Vec::new();
     let mut outside_vert = Vec::new();
