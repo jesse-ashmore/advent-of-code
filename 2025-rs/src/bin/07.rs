@@ -16,7 +16,7 @@ pub fn solve(input: &str) -> (Option<u64>, Option<u64>) {
 
     let mut memo = HashMap::new();
     let timelines = get_total_paths_from(start, &manifold, &mut memo);
-    (Some(splits), Some(timelines as u64))
+    (Some(splits), Some(timelines))
 }
 
 struct BeamState {
@@ -44,8 +44,8 @@ fn get_total_paths_from(
             // Split beam either side.
             let left = DirectionAll::Left.step_usize(beam);
             let right = DirectionAll::Right.step_usize(beam);
-            let total_left = get_total_paths_from(left, &manifold, memo);
-            let total_right = get_total_paths_from(right, &manifold, memo);
+            let total_left = get_total_paths_from(left, manifold, memo);
+            let total_right = get_total_paths_from(right, manifold, memo);
             memo.insert(start, total_left + total_right);
             return total_left + total_right;
         } else {
@@ -74,7 +74,7 @@ fn fire_tachyon(start: (usize, usize), manifold: &Vec<Vec<bool>>) -> Vec<Vec<boo
         }
         let next_beam = DirectionAll::Down.step_usize(pos);
         // Hit the end for this beam, track its path
-        if beam_can_exist(&manifold, next_beam) {
+        if beam_can_exist(manifold, next_beam) {
             beam_fronts.push_back(BeamState {
                 pos: next_beam,
                 split_by: None,
@@ -83,13 +83,13 @@ fn fire_tachyon(start: (usize, usize), manifold: &Vec<Vec<bool>>) -> Vec<Vec<boo
             // Split beam either side.
             let left = DirectionAll::Left.step_usize(next_beam);
             let right = DirectionAll::Right.step_usize(next_beam);
-            if beam_can_exist(&manifold, left) && tachyon_map.getxy_pos(left) == Some(&false) {
+            if beam_can_exist(manifold, left) && tachyon_map.getxy_pos(left) == Some(&false) {
                 beam_fronts.push_back(BeamState {
                     pos: left,
                     split_by: Some(next_beam),
                 });
             }
-            if beam_can_exist(&manifold, right) && tachyon_map.getxy_pos(right) == Some(&false) {
+            if beam_can_exist(manifold, right) && tachyon_map.getxy_pos(right) == Some(&false) {
                 beam_fronts.push_back(BeamState {
                     pos: right,
                     split_by: Some(next_beam),

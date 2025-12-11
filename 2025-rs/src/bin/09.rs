@@ -1,6 +1,5 @@
-use std::collections::{HashMap, HashSet};
 
-use advent_of_code::{DirectionAxes, Pairs, Pos2D};
+use advent_of_code::{DirectionAxes, Pairs};
 use itertools::Itertools;
 
 advent_of_code::solution!(9);
@@ -110,16 +109,14 @@ pub fn solve(input: &str) -> (Option<u64>, Option<u64>) {
 fn get_heading(from: (u64, u64), to: (u64, u64)) -> DirectionAxes {
     if from.0 == to.0 {
         if from.1 < to.1 {
-            return DirectionAxes::Down;
+            DirectionAxes::Down
         } else {
-            return DirectionAxes::Up;
-        };
+            DirectionAxes::Up
+        }
+    } else if from.0 < to.0 {
+        DirectionAxes::Right
     } else {
-        if from.0 < to.0 {
-            return DirectionAxes::Right;
-        } else {
-            return DirectionAxes::Left;
-        };
+        DirectionAxes::Left
     }
 }
 

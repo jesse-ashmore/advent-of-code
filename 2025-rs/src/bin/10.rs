@@ -1,4 +1,4 @@
-use std::{collections::VecDeque, os::macos::raw::stat};
+use std::{collections::VecDeque};
 
 use itertools::Itertools;
 
@@ -67,7 +67,7 @@ struct State {
 
 fn get_min_presses(end: u16, buttons: &[u16]) -> usize {
     let mut queue = VecDeque::new();
-    for (_, button) in buttons.iter().enumerate() {
+    for button in buttons.iter() {
         queue.push_front((*button, 1usize));
     }
 
@@ -75,7 +75,7 @@ fn get_min_presses(end: u16, buttons: &[u16]) -> usize {
         if state.0 == end {
             return state.1;
         }
-        for (_, button) in buttons.iter().enumerate() {
+        for button in buttons.iter() {
             queue.push_back((state.0 ^ *button, state.1 + 1));
         }
     }
@@ -90,12 +90,5 @@ mod tests {
     fn test_solve() {
         let result = solve(&advent_of_code::template::read_file("examples", DAY));
         assert_eq!(result, (Some(7), None));
-    }
-
-    #[test]
-    fn test_press() {
-        assert_eq!(0b0110, press(0, 0b0110));
-        assert_eq!(0, press(0b0110, 0b0110));
-        assert_eq!(0b0100, press(0b010, 0b0110));
     }
 }
