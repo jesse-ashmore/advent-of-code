@@ -65,17 +65,13 @@ pub fn solve(input: &str) -> (Option<usize>, Option<usize>) {
 
     let part_2 = machines.iter().map(|m| get_min_joltage_presses(m)).sum();
 
-    // https://docs.rs/good_lp/latest/good_lp/ ?
-    // https://docs.rs/highs/latest/highs/
-    // Using micro-lp: https://github.com/timvisee/advent-of-code-2025/blob/master/day10b/src/main.rs
-    // Using good_lp: https://github.com/wilkotom/AdventOfCode/blob/main/rust/2025/day10/src/main.rs
-
     (Some(part_1), Some(part_2))
 }
 
 fn get_min_joltage_presses(machine: &Machine) -> usize {
+    // Using good_lp: https://github.com/wilkotom/AdventOfCode/blob/main/rust/2025/day10/src/main.rs
     let mut variables: ProblemVariables = ProblemVariables::new();
-    let mut presses = (0..machine.cardinal_buttons.len())
+    let presses = (0..machine.cardinal_buttons.len())
         // Each variable represents the number of times each button is pressed.
         .map(|_| variables.add(variable().min(0).integer()))
         .collect_vec();
@@ -129,6 +125,6 @@ mod tests {
     #[test]
     fn test_solve() {
         let result = solve(&advent_of_code::template::read_file("examples", DAY));
-        assert_eq!(result, (Some(7), None));
+        assert_eq!(result, (Some(7), Some(33)));
     }
 }
