@@ -37,6 +37,5 @@ tinyjson = "2.5.1"
 
 # On Windows, highs requires cmake in PATH, e.g. C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\...\CMake\CMake\bin
 # It also requires LLVM: https://llvm.org/docs/GettingStartedVS.html OR winget install llvm
-# It also requires coin_cbc for some reason
-good_lp = { version = "1.14.2", features = ["highs"] }
+good_lp = { version = "1.14.2", features = ["highs"], default-features = false }
 chrono = {version = "0.4.42", optional = true }
