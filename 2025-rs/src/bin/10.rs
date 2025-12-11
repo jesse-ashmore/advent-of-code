@@ -1,6 +1,6 @@
-use std::{collections::VecDeque};
-
+use good_lp::*;
 use itertools::Itertools;
+use std::collections::VecDeque;
 
 advent_of_code::solution!(10);
 
@@ -8,6 +8,7 @@ advent_of_code::solution!(10);
 struct Machine {
     start_pattern: u16,
     buttons: Vec<u16>,
+    cardinal_buttons: Vec<Vec<usize>>,
     requirements: Vec<usize>,
 }
 
@@ -32,6 +33,15 @@ impl Machine {
                     .sum()
             })
             .collect_vec();
+        let cardinal_buttons = parts[1..parts.len() - 1]
+            .iter()
+            .map(|block| {
+                block[1..block.len() - 1]
+                    .split(",")
+                    .map(|t| t.parse().unwrap())
+                    .collect_vec()
+            })
+            .collect_vec();
         let requirements = parts[parts.len() - 1][1..parts[parts.len() - 1].len() - 1]
             .split(",")
             .map(|t| t.parse().unwrap())
@@ -40,6 +50,7 @@ impl Machine {
         Machine {
             start_pattern,
             buttons,
+            cardinal_buttons,
             requirements,
         }
     }
@@ -52,17 +63,46 @@ pub fn solve(input: &str) -> (Option<usize>, Option<usize>) {
         .map(|m| get_min_presses(m.start_pattern, &m.buttons))
         .sum();
 
+    let part_2 = machines.iter().map(|m| get_min_joltage_presses(m)).sum();
+
     // https://docs.rs/good_lp/latest/good_lp/ ?
     // https://docs.rs/highs/latest/highs/
     // Using micro-lp: https://github.com/timvisee/advent-of-code-2025/blob/master/day10b/src/main.rs
     // Using good_lp: https://github.com/wilkotom/AdventOfCode/blob/main/rust/2025/day10/src/main.rs
 
-    (Some(part_1), None)
+    (Some(part_1), Some(part_2))
 }
 
-struct State {
-    indicators: u16,
-    presses: usize,
+fn get_min_joltage_presses(machine: &Machine) -> usize {
+    let mut variables: ProblemVariables = ProblemVariables::new();
+    let mut presses = (0..machine.cardinal_buttons.len())
+        // Each variable represents the number of times each button is pressed.
+        .map(|_| variables.add(variable().min(0).integer()))
+        .collect_vec();
+
+    let mut problem = good_lp::highs(variables.minimise(presses.iter().sum::<Expression>()));
+    // Each expression represents a joltage requirement.
+    let mut expressions =
+        vec![Expression::with_capacity(machine.cardinal_buttons.len()); machine.requirements.len()];
+
+    // Increment each counter by the effect each button has on that counter.
+    for (i, button) in machine.cardinal_buttons.iter().enumerate() {
+        for cardinal in button {
+            expressions[*cardinal] += presses[i]; // This is a variable we are adding to the expression.
+        }
+    }
+
+    // Require that each joltage expression match what the machine needs to start.
+    for (exp, joltage) in expressions.into_iter().zip(&machine.requirements) {
+        problem.add_constraint(exp.eq(*joltage as f64));
+    }
+
+    // Evaluate the problem we have set up (minimum number of button presses to achieve the joltage requirements).
+    let solution = problem.solve().expect("Failed to solve problem");
+    presses
+        .iter()
+        .map(|press| solution.value(*press))
+        .sum::<f64>() as usize
 }
 
 fn get_min_presses(end: u16, buttons: &[u16]) -> usize {

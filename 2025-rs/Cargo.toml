@@ -25,7 +25,6 @@ test_lib = []
 [dependencies]
 
 # Template dependencies
-chrono = { version = "0.4.31", optional = true }
 counter = "0.6.0"
 dhat = { version = "0.3.2", optional = true }
 fxhash = "0.2.1"
@@ -35,3 +34,9 @@ regex = "1.11.1"
 tinyjson = "2.5.1"
 
 # Solution dependencies
+
+# On Windows, highs requires cmake in PATH, e.g. C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\...\CMake\CMake\bin
+# It also requires LLVM: https://llvm.org/docs/GettingStartedVS.html OR winget install llvm
+# It also requires coin_cbc for some reason
+good_lp = { version = "1.14.2", features = ["highs"] }
+chrono = {version = "0.4.42", optional = true }
