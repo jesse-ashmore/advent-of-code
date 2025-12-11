@@ -63,7 +63,7 @@ pub fn solve(input: &str) -> (Option<usize>, Option<usize>) {
         .map(|m| get_min_presses(m.start_pattern, &m.buttons))
         .sum();
 
-    let part_2 = machines.iter().map(|m| get_min_joltage_presses(m)).sum();
+    let part_2 = machines.iter().map(get_min_joltage_presses).sum();
 
     (Some(part_1), Some(part_2))
 }
