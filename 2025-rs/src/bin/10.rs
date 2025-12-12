@@ -1,6 +1,6 @@
 use good_lp::*;
 use itertools::Itertools;
-use std::collections::VecDeque;
+use std::collections::{HashMap, VecDeque};
 
 advent_of_code::solution!(10);
 
@@ -102,16 +102,25 @@ fn get_min_joltage_presses(machine: &Machine) -> usize {
 }
 
 fn get_min_presses(end: u16, buttons: &[u16]) -> usize {
+    let mut seen: HashMap<u16, usize> = HashMap::new();
     let mut queue = VecDeque::new();
     for button in buttons.iter() {
         queue.push_front((*button, 1usize));
     }
 
-    while let Some(state) = queue.pop_front() {
+    while let Some(state) = queue.pop_back() {
+        seen.insert(state.0, state.1);
+
         if state.0 == end {
             return state.1;
         }
         for button in buttons.iter() {
+            let next = state.0 ^ *button;
+            if let Some(previous) = seen.get(&next) {
+                if *previous <= state.1 + 1 {
+                    continue;
+                }
+            }
             queue.push_back((state.0 ^ *button, state.1 + 1));
         }
     }
