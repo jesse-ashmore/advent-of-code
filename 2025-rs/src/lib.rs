@@ -419,7 +419,7 @@ impl Direction for DirectionAll {
         )
     }
 
-    fn turn(&self, clockwise: bool) -> Self {
+    fn turn(&self, _clockwise: bool) -> Self {
         unimplemented!()
     }
 }

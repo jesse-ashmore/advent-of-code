@@ -14,7 +14,7 @@ struct Equation {
 }
 
 impl Equation {
-    fn from_row(row: &Vec<String>) -> Equation {
+    fn from_row(row: &[String]) -> Equation {
         let op = match row.last().unwrap().chars().next() {
             Some('+') => Operation::Add,
             Some('*') => Operation::Multiply,
@@ -122,7 +122,7 @@ fn parse_equations(input: &str) -> Vec<Equation> {
 
     parsed
         .iter()
-        .map(Equation::from_row)
+        .map(|p| Equation::from_row(p))
         .collect_vec()
 }
 

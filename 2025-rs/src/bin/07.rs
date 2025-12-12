@@ -69,7 +69,9 @@ fn fire_tachyon(start: (usize, usize), manifold: &Vec<Vec<bool>>) -> Vec<Vec<boo
         if let Some(already_present) = tachyon_map.getxy_pos_mut(pos) {
             *already_present = true;
             if let Some(splitter) = split_by {
-                beam_splits.getxy_pos_mut(splitter).map(|p| *p = true);
+                if let Some(p) = beam_splits.getxy_pos_mut(splitter) {
+                    *p = true
+                }
             }
         }
         let next_beam = DirectionAll::Down.step_usize(pos);

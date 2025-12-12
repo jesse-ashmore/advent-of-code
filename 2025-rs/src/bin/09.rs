@@ -82,7 +82,7 @@ pub fn solve(input: &str) -> (Option<u64>, Option<u64>) {
 
     let largest_inner_rect = square_like_ordered
         .iter()
-        .filter(|(a, b)| {
+        .find(|(a, b)| {
             let top = a.1.min(b.1);
             let right = a.0.max(b.0);
             let bottom = a.1.max(b.1);
@@ -101,7 +101,6 @@ pub fn solve(input: &str) -> (Option<u64>, Option<u64>) {
 
             true
         })
-        .next()
         .map(|pair| area_manhattan(*pair));
     (part_1, largest_inner_rect)
 }

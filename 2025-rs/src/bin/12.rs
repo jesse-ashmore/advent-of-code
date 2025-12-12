@@ -1,5 +1,3 @@
-use std::usize;
-
 use advent_of_code::Grid;
 use itertools::Itertools;
 
@@ -63,15 +61,15 @@ fn parse_input(input: &str) -> (Vec<[[bool; 3]; 3]>, Vec<Schema>) {
             let (lhs, rhs) = line.split_once(": ").unwrap();
             let (width, height) = lhs.split_once("x").unwrap();
             let needed = rhs.split(" ").map(|p| p.parse().unwrap()).collect_vec();
-            return Schema {
+            Schema {
                 width: width.parse().unwrap(),
                 height: height.parse().unwrap(),
                 requirements: needed,
-            };
+            }
         })
         .collect_vec();
 
-    return (tiles, schemas);
+    (tiles, schemas)
 }
 
 #[cfg(test)]
